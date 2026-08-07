@@ -8,17 +8,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: kivy/buildozer:latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
+      - name: Setup and Build APK
         run: |
-          # اجرای Buildozer به عنوان کاربر عادی (اجباری)
-          buildozer android debug
+          # نصب وابستگی‌ها
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev libltdl-dev expect
+          
+          # نصب Buildozer
+          pip install buildozer cython
+          
+          # حذف SDK سیستمی
+          sudo rm -rf /usr/local/lib/android/sdk || true
+          sudo rm -rf /usr/local/lib/android/ndk || true
+          
+          # ساخت با expect
+          expect -c '
+            spawn buildozer android debug
+            expect "Are you sure you want to continue [y/n]?"
+            send "y\r"
+            expect eof
+          '
 
       - name: Upload APK artifact
         if: success()
