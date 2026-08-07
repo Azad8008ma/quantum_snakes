@@ -1,26 +1,39 @@
-name: Build Android APK
+name: Build Kivy APK
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # اینو بذار که بتونی دستی اجراش کنی
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          python-version: '3.9' # نسخه پایتون، می‌تونی 3.10 یا 3.11 هم امتحان کنی
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 
-      - name: Build APK
-        run: ./gradlew assembleDebug
+      - name: Install Buildozer
+        run: |
+          pip install buildozer
+          # اگر از کتابخونه jnius استفاده می‌کنی، این خط رو اضافه کن:
+          # pip install "jnius>=1.4.0"
+
+      - name: Build APK with Buildozer
+        run: buildozer android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kivy-apk
+          path: bin/*.apk
