@@ -35,8 +35,7 @@ version = 1.0.0
 # version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
-# comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,pygame
+requirements = python3,kivy,kivymd,pygame,cython
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -88,19 +87,19 @@ fullscreen = 0
 android.permissions = VIBRATE
 
 # (int) Target Android API, should be as high as possible.
-#android.api = 27
+android.api = 33
 
 # (int) Minimum API your APK will support.
-#android.minapi = 21
+android.minapi = 21
 
 # (int) Android SDK version to use
-#android.sdk = 20
+android.sdk = 33
 
 # (str) Android NDK version to use
-#android.ndk = 19b
+android.ndk = 25c
 
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
-#android.ndk_api = 21
+android.ndk_api = 21
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
@@ -283,44 +282,8 @@ log_level = 2
 # (int) Display warning if buildozer is used as root (0 = False, 1 = True)
 warn_on_root = 1
 
-# (str) Path to build artifact storage, absolute or relative to spec file, or Commun
+# (str) Path to build artifact storage, absolute or relative to spec file
 # build_dir = ./.buildozer
 
 # (str) Path to build output (i.e. .apk, .ipa) storage
 # bin_dir = ./bin
-
-#    -----------------------------------------------------------------
-#    List as sections
-#
-#    You can define all the "list" as [section:key].
-#    Each line will be considered as a option to the list.
-#    Let's take [app] / source.exclude_patterns.
-#    Instead of doing:
-#
-#[app]
-#source.exclude_patterns = license,data/audio/*.wav,data/images/original/*
-#
-#    This can be translated into:
-#
-#[app:source.exclude_patterns]
-#license
-#data/audio/*.wav
-#data/images/original/*
-
-#    -----------------------------------------------------------------
-#    Profiles
-#
-#    You can extend section / key with a profile
-#    For example, you want to deploy a demo version of your application without
-#    HD content. You could first change the title to add "(demo)" in the name
-#    and extend the excluded directories to remove the HD content.
-#
-#[app@demo]
-#title = My Application (demo)
-#
-#[app:source.exclude_patterns@demo]
-#images/hd/*
-#
-#    Then, invoke the command line with the "demo" profile:
-#
-#buildozer --profile demo android debug
