@@ -49,8 +49,25 @@ jobs:
             exit 1
           fi
 
+      - name: Setup Android SDK licenses
+        run: |
+          mkdir -p ~/.android
+          echo "### User Sources for Android SDK Manager" > ~/.android/repositories.cfg
+          echo "### User Sources for Android SDK Manager" >> ~/.android/repositories.cfg
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          yes | sdkmanager --licenses || true
+
+      - name: Install Android SDK Build-Tools
+        run: |
+          ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.0" || true
+
       - name: Build APK with Buildozer
-        run: buildozer android debug
+        run: |
+          export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+          buildozer android debug
 
       - name: Upload APK artifact
         if: success()
