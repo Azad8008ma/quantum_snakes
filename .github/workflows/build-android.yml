@@ -31,6 +31,12 @@ jobs:
             cmake libffi-dev libssl-dev \
             libltdl-dev
 
+      - name: Remove pre-installed Android SDK/NDK
+        run: |
+          sudo rm -rf /usr/local/lib/android/sdk
+          sudo rm -rf /usr/local/lib/android/ndk
+          echo "✅ Removed pre-installed Android SDK/NDK"
+
       - name: Install Buildozer
         run: |
           pip install --upgrade pip
@@ -49,24 +55,11 @@ jobs:
             exit 1
           fi
 
-      - name: Setup Android SDK licenses
-        run: |
-          mkdir -p ~/.android
-          echo "### User Sources for Android SDK Manager" > ~/.android/repositories.cfg
-          echo "### User Sources for Android SDK Manager" >> ~/.android/repositories.cfg
-
-      - name: Accept Android SDK licenses
-        run: |
-          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          yes | sdkmanager --licenses || true
-
-      - name: Install Android SDK Build-Tools
-        run: |
-          ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.0" || true
-
       - name: Build APK with Buildozer
         run: |
-          export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+          export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+          export ANDROID_NDK_HOME=$HOME/.buildozer/android/platform/android-ndk-r25c
+          export ANDROID_NDK_ROOT=$HOME/.buildozer/android/platform/android-ndk-r25c
           buildozer android debug
 
       - name: Upload APK artifact
