@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch: # این گزینه رو اضافه کردم تا بتونی به صورت دستی هم اجراش کنی
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10' # نسخه پایدار پایتون
+        python-version: '3.10'
 
     - name: Install system dependencies for Kivy/Buildozer
       run: |
@@ -29,28 +29,26 @@ jobs:
           git zip unzip \
           openjdk-17-jdk \
           python3-pip autoconf libtool pkg-config zlib1g-dev \
-          libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+          libncurses5-dev libncursesw5-dev \
           libffi-dev libssl-dev \
           libltdl-dev \
-          # برای پشتیبانی از گرافیک و صدا
           libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
           libportmidi-dev \
           libswscale-dev libavformat-dev libavcodec-dev \
-          libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+          libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+          cmake \
+          # حذف شد: libtinfo5
 
     - name: Install Python dependencies
       run: |
         pip install --upgrade pip
         pip install buildozer cython
-        # نصب پیش‌نیازهای پروژه (با توجه به requirements.txt)
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Build APK with Buildozer
       run: |
-        # زمان زیادی می‌بره، پس صبور باش :)
         buildozer -v android debug
 
-    # این مرحله برای ذخیره فایل APK ساخته شده هست
     - name: Upload APK as an artifact
       uses: actions/upload-artifact@v4
       with:
