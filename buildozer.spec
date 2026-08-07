@@ -101,6 +101,9 @@ android.ndk = 25c
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 android.ndk_api = 21
 
+# (bool) If True, then automatically accept SDK license
+android.accept_sdk_license = True
+
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
 
@@ -116,9 +119,6 @@ android.ndk_api = 21
 # (bool) If True, then skip trying to update the Android sdk
 # This should be True for most cases, unless you want to use a specific Android SDK.
 #android.skip_update = False
-
-# (bool) If True, then automatically accept SDK license
-#android.accept_sdk_license = False
 
 # (str) Android entry point, default is ok (Kivy with button in notification.)
 #android.entrypoint = org.renpy.android.PythonActivity
