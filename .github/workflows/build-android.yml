@@ -17,7 +17,7 @@ jobs:
 
       - name: Build APK with Buildozer
         run: |
-          export HOME=/home/user
+          # اجرای Buildozer به عنوان کاربر عادی (اجباری)
           buildozer android debug
 
       - name: Upload APK artifact
