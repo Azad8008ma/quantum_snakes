@@ -1,42 +1,58 @@
-name: Build Kivy APK
+# .github/workflows/build-android.yml
+
+name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # این گزینه رو اضافه کردم تا بتونی به صورت دستی هم اجراش کنی
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup and Build APK
-        run: |
-          # نصب وابستگی‌ها
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev libltdl-dev expect
-          
-          # نصب Buildozer
-          pip install buildozer cython
-          
-          # حذف SDK سیستمی
-          sudo rm -rf /usr/local/lib/android/sdk || true
-          sudo rm -rf /usr/local/lib/android/ndk || true
-          
-          # ساخت با expect
-          expect -c '
-            spawn buildozer android debug
-            expect "Are you sure you want to continue [y/n]?"
-            send "y\r"
-            expect eof
-          '
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' # نسخه پایدار پایتون
 
-      - name: Upload APK artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kivy-apk
-          path: bin/*.apk
+    - name: Install system dependencies for Kivy/Buildozer
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          git zip unzip \
+          openjdk-17-jdk \
+          python3-pip autoconf libtool pkg-config zlib1g-dev \
+          libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+          libffi-dev libssl-dev \
+          libltdl-dev \
+          # برای پشتیبانی از گرافیک و صدا
+          libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+          libportmidi-dev \
+          libswscale-dev libavformat-dev libavcodec-dev \
+          libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install buildozer cython
+        # نصب پیش‌نیازهای پروژه (با توجه به requirements.txt)
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Build APK with Buildozer
+      run: |
+        # زمان زیادی می‌بره، پس صبور باش :)
+        buildozer -v android debug
+
+    # این مرحله برای ذخیره فایل APK ساخته شده هست
+    - name: Upload APK as an artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: quantum-snakes-apk
+        path: bin/*.apk
