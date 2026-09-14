@@ -1,0 +1,76 @@
+name: Build Android APK
+
+# این ورک‌فلو هم با هر بار پوش به شاخه main اجرا می‌شود و هم می‌توانید دستی اجراش کنید
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # اجرای دستی از تب Actions
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. دریافت کد پروژه
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. تنظیم محیط پایتون
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3. کش کردن پوشه بیلدوزر برای افزایش سرعت در اجرای‌های بعدی
+    - name: Cache Buildozer dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.buildozer
+          ~/.gradle
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
+
+    # 4. نصب وابستگی‌های سیستمی لینوکس (ضروری برای بیلدوزر)
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          git zip unzip openjdk-17-jdk \
+          autoconf libtool pkg-config \
+          zlib1g-dev libncurses-dev libncursesw5-dev \
+          cmake libffi-dev libssl-dev libltdl-dev
+
+    # 5. نصب وابستگی‌های پایتون
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython
+
+    # 6. اصلاح خودکار buildozer.spec (حذف audiostream که باعث خطا می‌شود)
+    - name: Fix buildozer.spec
+      run: |
+        # حذف audiostream
+        sed -i 's/,audiostream//g' buildozer.spec
+        sed -i 's/audiostream,//g' buildozer.spec
+        # جلوگیری از ایجاد کامای دوبل (,,)
+        sed -i 's/,,/,/g' buildozer.spec
+        echo "✅ فایل buildozer.spec بهینه‌سازی شد."
+
+    # 7. اجرای فرآیند ساخت APK
+    - name: Build APK with Buildozer
+      run: |
+        # فلگ -y برای قبول خودکار لایسنس‌ها
+        # فلگ v برای نمایش لاگ‌های دقیق (جهت عیب‌یابی در صورت خطا)
+        buildozer -y v android debug
+
+    # 8. آپلود فایل APK ساخته‌شده به عنوان Artifact
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: QuantumSnake-Mobile-APK
+        path: bin/*.apk
+        if-no-files-found: error
